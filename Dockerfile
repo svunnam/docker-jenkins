@@ -28,7 +28,7 @@ ENV JENKINS_SLAVE_AGENT_PORT 50000
 # Jenkins is run with user `jenkins`, uid = 1000
 # If you bind mount a volume from the host or a data container, 
 # ensure you use the same uid
-RUN useradd -d "$JENKINS_HOME" -u 1000 -m -s /bin/bash jenkins && echo 'jenkins:jenkins' |chpasswd
+RUN useradd -d "$JENKINS_HOME" -u 1000 -m -s /bin/bash jenkins && echo 'jenkins:jenkins' |chpasswd && adduser jenkins sudo
 
 # Jenkins home directory is a volume, so configuration and build history 
 # can be persisted and survive image upgrades
