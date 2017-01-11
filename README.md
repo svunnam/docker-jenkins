@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Official Jenkins Docker image
 
 The Jenkins Continuous Integration and Delivery server.
@@ -183,3 +184,6 @@ As always - please ensure that you know how to drive docker - especially volume 
 # Questions?
 
 Jump on irc.freenode.net and the #jenkins room. Ask!
+=======
+# docker-jenkins
+>>>>>>> e82ef2711d6c82dccf82bff4154f2561d552b5da
