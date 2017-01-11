@@ -1,5 +1,5 @@
 FROM ubuntu:14.04
-MAINTAINER Shawn Bow <shawnbow81@gmail.com>
+MAINTAINER Sivakumar Vunnam <sivakumar.vunnam@wdc.com>
 
 RUN dpkg --add-architecture i386
 # The first apt-get install is for deps listed at
@@ -9,9 +9,6 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends autoconf2.13 bison bzip2 ccache curl flex gawk gcc g++ g++-multilib git lib32ncurses5-dev lib32z1-dev libgconf2-dev zlib1g:amd64 zlib1g-dev:amd64 zlib1g:i386 zlib1g-dev:i386 libgl1-mesa-dev libx11-dev make zip libxml2-utils lzop && \
     apt-get install -y python python-dev openjdk-7-jdk wget libdbus-glib-1-dev libxt-dev unzip tree patch vim screen openssh-server subversion
 
-# Install nodejs
-RUN mkdir /nodejs && curl https://nodejs.org/dist/v4.2.0/node-v4.2.0-linux-x64.tar.gz | tar xvzf - -C /nodejs --strip-components=1 && \
-    echo "export PATH=/nodejs/bin:\$PATH:" >> /etc/bash.bashrc && /nodejs/bin/npm install -g bower
 
 # Setup sshd
 RUN mkdir /var/run/sshd && \
@@ -47,13 +44,20 @@ RUN curl -fL https://github.com/krallin/tini/releases/download/v0.5.0/tini-stati
 
 COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groovy
 
-ENV JENKINS_VERSION 1.625.1
-ENV JENKINS_SHA c96d44d4914a154c562f21cd20abdd675ac7f5f3
+ARG JENKINS_VERSION
+ENV JENKINS_VERSION ${JENKINS_VERSION:-2.32.1}
 
-# could use ADD but this one does not check Last-Modified header 
+# jenkins.war checksum, download will be validated using it
+ARG JENKINS_SHA=1b65dc498ba7ab1f5cce64200b920a8716d90834
+
+
+# Can be used to customize where jenkins.war get downloaded from
+ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
+
+# could use ADD but this one does not check Last-Modified header neither does it allow to control checksum 
 # see https://github.com/docker/docker/issues/8331
-RUN curl -fL http://mirrors.jenkins-ci.org/war-stable/$JENKINS_VERSION/jenkins.war -o /usr/share/jenkins/jenkins.war \
-  && echo "$JENKINS_SHA /usr/share/jenkins/jenkins.war" | sha1sum -c -
+RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war \
+  && echo "${JENKINS_SHA}  /usr/share/jenkins/jenkins.war" | sha1sum -c -
 
 ENV JENKINS_UC https://updates.jenkins-ci.org
 RUN chown -R jenkins "$JENKINS_HOME" /usr/share/jenkins/ref
